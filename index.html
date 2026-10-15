@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#F5F3F7">
+<title>你像哪个历史人物？</title>
+<style>
+:root {
+  --bg: #F5F3F7;
+  --bg-cream: #FAF9FC;
+  --card: #FFFFFF;
+  --purple: #7B74B4;
+  --purple-deep: #5A5490;
+  --purple-dark: #2D2D5A;
+  --purple-soft: #E8E4F0;
+  --purple-lighter: #F0EDF5;
+  --purple-border: #D4CFE8;
+  --text: #333340;
+  --text-muted: #6B6B7B;
+  --text-light: #9999A8;
+  --accent-red: #E85A71;
+  --bar: #8B84C0;
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body {
+  height: 100%;
+  font-family: "PingFang SC", "Hiragino Sans GB", "Noto Sans CJK SC", "Noto Sans SC", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+  line-height: 1.6;
+}
+body { max-width: 430px; margin: 0 auto; position: relative; min-height: 100dvh; }
+
+.screen { display: none; min-height: 100dvh; flex-direction: column; }
+.screen.active { display: flex; }
+
+/* ===== START ===== */
+#start {
+  background: linear-gradient(180deg, #F8F6FB 0%, #EFEAF8 50%, #F5F3F7 100%);
+  padding: 48px 24px 32px;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+}
+.start-icon {
+  width: 72px; height: 72px;
+  background: var(--purple-soft);
+  border-radius: 20px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px; margin-bottom: 28px;
+  box-shadow: 0 4px 16px rgba(123,116,180,0.15);
+}
+.start-label {
+  font-size: 13px; color: var(--purple);
+  letter-spacing: 2px; margin-bottom: 12px;
+}
+.start-title {
+  font-size: 32px; font-weight: 700; color: var(--purple-dark);
+  line-height: 1.3; margin-bottom: 8px;
+}
+.start-title .hl {
+  background: linear-gradient(120deg, #FFE8A3 0%, #FFE8A3 100%);
+  background-size: 100% 40%;
+  background-repeat: no-repeat;
+  background-position: 0 85%;
+  padding: 0 2px;
+}
+.start-illus {
+  width: 160px; height: 100px;
+  margin: 24px auto;
+  background: var(--purple-lighter);
+  border-radius: 16px;
+  display: flex; align-items: center; justify-content: center;
+  gap: 12px; font-size: 42px;
+}
+.start-desc {
+  font-size: 14px; color: var(--text-muted);
+  margin: 8px 0 28px; max-width: 280px;
+}
+.start-tags {
+  display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+  margin-bottom: 36px;
+}
+.pill {
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 20px;
+  background: var(--purple-lighter);
+  color: var(--purple-deep);
+  font-size: 12px;
+}
+.btn-primary {
+  width: 100%; max-width: 300px;
+  padding: 16px 32px;
+  border: none; border-radius: 28px;
+  background: linear-gradient(135deg, #8B84C0, #6B64A8);
+  color: #fff; font-size: 17px; font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(107,100,168,0.35);
+  transition: transform 0.15s, box-shadow 0.15s;
+  font-family: inherit;
+}
+.btn-primary:active { transform: scale(0.97); }
+.start-hint {
+  margin-top: 20px; font-size: 12px; color: var(--text-light);
+}
+
+/* ===== QUIZ ===== */
+#quiz {
+  background: var(--bg);
+  padding: 0 0 var(--safe-bottom);
+}
+.quiz-header {
+  padding: 16px 20px 12px;
+  background: var(--card);
+  border-bottom: 1px solid var(--purple-border);
+  position: sticky; top: 0; z-index: 10;
+}
+.quiz-progress-row {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px;
+}
+.quiz-progress-text { font-size: 13px; color: var(--purple); font-weight: 500; }
+.quiz-back {
+  background: none; border: none; color: var(--text-muted);
+  font-size: 14px; cursor: pointer; padding: 4px 0; font-family: inherit;
+}
+.progress-bar-track {
+  height: 4px; background: var(--purple-soft); border-radius: 2px; overflow: hidden;
+}
+.progress-bar-fill {
+  height: 100%; background: linear-gradient(90deg, #8B84C0, #6B64A8);
+  border-radius: 2px; transition: width 0.3s ease;
+}
+.quiz-body { padding: 28px 20px 24px; flex: 1; }
+.q-number {
+  font-size: 12px; color: var(--purple); font-weight: 600;
+  letter-spacing: 1px; margin-bottom: 10px;
+}
+.q-text {
+  font-size: 20px; font-weight: 600; color: var(--purple-dark);
+  line-height: 1.45; margin-bottom: 28px;
+}
+.options { display: flex; flex-direction: column; gap: 12px; }
+.option {
+  padding: 16px 18px;
+  background: var(--card);
+  border: 1.5px solid var(--purple-border);
+  border-radius: 14px;
+  font-size: 15px; color: var(--text);
+  cursor: pointer; text-align: left;
+  transition: all 0.2s;
+  font-family: inherit; line-height: 1.5;
+  box-shadow: 0 1px 4px rgba(123,116,180,0.06);
+}
+.option:active, .option.selected {
+  border-color: var(--purple);
+  background: var(--purple-lighter);
+  color: var(--purple-deep);
+  transform: scale(0.985);
+}
+
+/* ===== RESULT ===== */
+#result {
+  background: var(--bg);
+  padding-bottom: calc(80px + var(--safe-bottom));
+}
+.result-top {
+  padding: 14px 16px;
+  background: var(--card);
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--purple-border);
+  position: sticky; top: 0; z-index: 10;
+}
+.result-top-label { font-size: 14px; color: var(--purple-dark); font-weight: 600; }
+.result-slide-ind { font-size: 12px; color: var(--text-light); }
+
+/* Swipe container */
+.slides-wrap {
+  width: 100%;
+  overflow: hidden;
+  touch-action: pan-y;
+  position: relative;
+}
+.slides {
+  display: flex;
+  width: 100%;
+  transition: transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+  will-change: transform;
+}
+.slide {
+  box-sizing: border-box;
+  width: 100%;
+  flex: 0 0 100%;
+  padding: 20px 16px 16px;
+  min-height: 1px;
+}
+
+.card {
+  background: var(--card);
+  border-radius: 16px;
+  border: 1px solid var(--purple-border);
+  padding: 22px 18px;
+  margin-bottom: 14px;
+  box-shadow: 0 2px 12px rgba(123,116,180,0.08);
+}
+.card-section-title {
+  font-size: 15px; font-weight: 700; color: var(--purple-dark);
+  margin-bottom: 14px;
+  display: flex; align-items: center; gap: 6px;
+}
+.card-section-title .num {
+  color: var(--purple); font-size: 14px;
+}
+
+/* Slide 1 match */
+.match-label {
+  font-size: 13px; color: var(--purple); text-align: center; margin-bottom: 8px;
+}
+.match-icon {
+  text-align: center; font-size: 28px; margin-bottom: 4px; opacity: 0.7;
+}
+.match-pct {
+  font-size: 56px; font-weight: 700; color: #7B74B4;
+  text-align: center; line-height: 1.15; letter-spacing: -1px;
+  font-variant-numeric: tabular-nums;
+}
+.match-name {
+  font-size: 28px; font-weight: 700; color: #2D2D5A;
+  text-align: center; margin: 6px 0 4px;
+}
+.match-sub {
+  font-size: 13px; color: var(--text-muted); text-align: center; margin-bottom: 16px;
+}
+.tag-row {
+  display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 12px;
+}
+.tag {
+  padding: 5px 14px; border-radius: 20px;
+  background: var(--purple-lighter); color: var(--purple-deep);
+  font-size: 13px; font-weight: 500;
+}
+.dom-dim {
+  display: block; text-align: center;
+  margin: 0 auto 18px; width: fit-content;
+  padding: 6px 18px; border-radius: 20px;
+  background: var(--purple-soft); color: var(--purple-deep);
+  font-size: 13px; font-weight: 600;
+}
+.quote-box {
+  background: var(--purple-lighter);
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+.quote-label {
+  font-size: 12px; color: var(--purple); font-weight: 600; margin-bottom: 6px;
+}
+.quote-text {
+  font-size: 15px; color: var(--purple-dark); font-weight: 500;
+  line-height: 1.55;
+}
+
+/* Narrative footer on slides */
+.hist-footer {
+  margin-top: 8px; padding: 16px 4px 8px;
+}
+.hist-footer h3 {
+  font-size: 15px; font-weight: 700; color: var(--purple-dark);
+  margin-bottom: 10px; line-height: 1.4;
+}
+.hist-footer p {
+  font-size: 13px; color: var(--text-muted); line-height: 1.75;
+}
+
+/* Bars */
+.bar-row {
+  display: flex; align-items: center; margin-bottom: 12px; gap: 10px;
+}
+.bar-label {
+  width: 36px; flex-shrink: 0;
+  font-size: 13px; color: var(--text); font-weight: 500;
+}
+.bar-track {
+  flex: 1; height: 10px; background: var(--purple-soft);
+  border-radius: 5px; overflow: hidden;
+}
+.bar-fill {
+  height: 100%; background: var(--bar); border-radius: 5px;
+  width: 0; transition: width 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+.bar-score {
+  width: 28px; text-align: right;
+  font-size: 13px; color: var(--purple); font-weight: 600;
+}
+
+/* Commonality */
+.trait-card {
+  background: var(--bg-cream);
+  border: 1px solid var(--purple-border);
+  border-radius: 12px;
+  padding: 14px 14px;
+  margin-bottom: 10px;
+}
+.trait-title {
+  font-size: 14px; font-weight: 700; color: var(--purple-dark); margin-bottom: 6px;
+}
+.trait-desc { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+
+/* Blind spot / advice */
+.warn-card, .advice-card {
+  border-radius: 12px; padding: 14px; margin-bottom: 10px;
+  border: 1px solid var(--purple-border);
+}
+.warn-card { background: #F8F4FC; }
+.advice-card { background: #F4F6FC; }
+.warn-title, .advice-title {
+  font-size: 13px; font-weight: 700; color: var(--purple-deep); margin-bottom: 6px;
+}
+.warn-body, .advice-body { font-size: 13px; color: var(--text-muted); line-height: 1.65; }
+
+/* Quotes speech bubbles */
+.speech {
+  background: var(--purple-lighter);
+  border-radius: 14px 14px 14px 4px;
+  padding: 12px 14px;
+  margin-bottom: 10px;
+  font-size: 14px; color: var(--purple-dark); font-weight: 500;
+  position: relative;
+}
+.speech::before {
+  content: '"';
+  color: var(--purple); font-size: 20px; font-weight: 700;
+  margin-right: 2px; opacity: 0.5;
+}
+
+/* Dots */
+.dots {
+  display: flex; justify-content: center; gap: 7px;
+  padding: 8px 0 12px;
+}
+.dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--purple-border);
+  transition: all 0.25s;
+}
+.dot.active {
+  background: var(--accent-red);
+  width: 18px; border-radius: 4px;
+}
+
+/* Bottom bar */
+.result-actions {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 430px;
+  padding: 12px 16px calc(12px + var(--safe-bottom));
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid var(--purple-border);
+  display: flex; gap: 10px; z-index: 20;
+}
+.btn-outline {
+  flex: 1; padding: 13px;
+  border: 1.5px solid var(--purple);
+  border-radius: 24px;
+  background: transparent; color: var(--purple-deep);
+  font-size: 15px; font-weight: 600; cursor: pointer;
+  font-family: inherit;
+}
+.btn-outline:active { background: var(--purple-lighter); }
+.btn-share {
+  flex: 1.2; padding: 13px;
+  border: none; border-radius: 24px;
+  background: linear-gradient(135deg, #8B84C0, #6B64A8);
+  color: #fff; font-size: 15px; font-weight: 600; cursor: pointer;
+  font-family: inherit;
+  box-shadow: 0 4px 14px rgba(107,100,168,0.3);
+}
+.btn-share:active { opacity: 0.9; }
+
+.swipe-hint {
+  text-align: center; font-size: 12px; color: var(--text-light);
+  padding: 0 0 4px;
+}
+
+/* Loading */
+#loading {
+  align-items: center; justify-content: center;
+  background: var(--bg); text-align: center; padding: 40px;
+}
+.loader {
+  width: 40px; height: 40px;
+  border: 3px solid var(--purple-soft);
+  border-top-color: var(--purple);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 20px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text { font-size: 15px; color: var(--purple-deep); font-weight: 500; }
+.loading-sub { font-size: 13px; color: var(--text-light); margin-top: 8px; }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+  background: rgba(45,45,90,0.9); color: #fff;
+  padding: 10px 20px; border-radius: 20px;
+  font-size: 13px; z-index: 100; opacity: 0;
+  transition: opacity 0.3s; pointer-events: none; white-space: nowrap;
+}
+.toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- START -->
+<section id="start" class="screen active">
+  <div class="start-icon">🏛️</div>
+  <div class="start-label">历史人物匹配</div>
+  <h1 class="start-title">你像哪个<br><span class="hl">历史人物</span>？</h1>
+  <div class="start-illus"><span>📜</span><span>⚔️</span><span>🪶</span></div>
+  <p class="start-desc">趣味测试，了解自己的历史人物原型<br>通过性格维度匹配千古人物底色</p>
+  <div class="start-tags">
+    <span class="pill">8 维能力画像</span>
+    <span class="pill">6 位历史人物</span>
+    <span class="pill">约 2 分钟</span>
+  </div>
+  <button class="btn-primary" id="btnStart">开始测试</button>
+  <p class="start-hint">共 10 道题 · 单选 · 结果可左右滑动查看</p>
+</section>
+
+<!-- QUIZ -->
+<section id="quiz" class="screen">
+  <div class="quiz-header">
+    <div class="quiz-progress-row">
+      <button class="quiz-back" id="btnQuizBack">← 上一题</button>
+      <span class="quiz-progress-text" id="quizProgress">1 / 10</span>
+    </div>
+    <div class="progress-bar-track">
+      <div class="progress-bar-fill" id="progressFill" style="width:10%"></div>
+    </div>
+  </div>
+  <div class="quiz-body">
+    <div class="q-number" id="qNumber">QUESTION 01</div>
+    <div class="q-text" id="qText"></div>
+    <div class="options" id="options"></div>
+  </div>
+</section>
+
+<!-- LOADING -->
+<section id="loading" class="screen">
+  <div class="loader"></div>
+  <div class="loading-text">正在匹配历史人物…</div>
+  <div class="loading-sub">分析你的性格底色与决策风格</div>
+</section>
+
+<!-- RESULT -->
+<section id="result" class="screen">
+  <div class="result-top">
+    <span class="result-top-label">你的历史人物匹配结果</span>
+    <span class="result-slide-ind" id="slideInd">1 / 6</span>
+  </div>
+  <div class="slides-wrap" id="slidesWrap">
+    <div class="slides" id="slides">
+      <!-- slides injected by JS -->
+    </div>
+  </div>
+  <p class="swipe-hint">← 左右滑动查看完整结果 →</p>
+  <div class="dots" id="dots"></div>
+  <div class="result-actions">
+    <button class="btn-outline" id="btnRetry">再测一次</button>
+    <button class="btn-share" id="btnShare">复制结果文案</button>
+  </div>
+</section>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ========== DIMENSIONS ========== */
+const DIMS = ['决断','共情','开创','洞察','表达','经营','独立','担当'];
+
+/* ========== FIGURES ========== */
+const FIGURES = [
+  {
+    id: 'zhugeliang',
+    name: '诸葛亮',
+    subtitle: '三国 · 长期主义谋臣 · 谋略家',
+    tags: ['洞察','布局','克制'],
+    dominant: '决断',
+    quote: '真正的谋划，是把责任坚持到最后。',
+    portrait: '你与诸葛亮相似的，并不是具体经历，而是处理世界的方式。你很少被表面热闹牵着走，善于从碎片里识别规律，把眼前得失放进更长的时间轴，再选择最有杠杆的一步。',
+    base: { 决断:98, 共情:38, 开创:38, 洞察:98, 表达:68, 经营:98, 独立:68, 担当:38 },
+    common: [
+      { title: '第一底色 · 决断', desc: '需要拍板时，你倾向滤掉噪声、抓住主线。这是你与诸葛亮最接近的一层性格。' },
+      { title: '隐藏天赋 · 洞察', desc: '你相信真正的答案藏在表象背后的规律里。这是你与他高度重合的另一面。' },
+      { title: '长期优势 · 经营', desc: '你看得见资源如何组合、如何产生长期价值。这也是你们共同的底色。' }
+    ],
+    realLife: '在现实里，你常常是局面中的观察者与设计者，习惯提前准备 Plan B。',
+    blindSpot: '想得太深时，可能错过快速行动的窗口。',
+    risk: '当「洞察」被过度使用，你可能把它变成唯一答案。压力之下，记得检查自己是否忽略了关系、节奏或新证据。',
+    advice: '好策略需要落地；信息足够时，允许自己果断下注。',
+    lines: [
+      '真正的谋划，是把责任坚持到最后。',
+      '别只看眼前这一手。',
+      '信息不全时，克制也是行动。'
+    ],
+    closing: '你是天生的慢决策者。别人凭直觉下判断时，你更想先推演所有可能的方向；别人很快熟络，你却要用时间确认对方是否值得信任；你也很难假装看不见自己不认同的事。'
+  },
+  {
+    id: 'wuzetian',
+    name: '武则天',
+    subtitle: '唐 · 破局者 · 权力架构师',
+    tags: ['决断','独立','开创'],
+    dominant: '决断',
+    quote: '规则不适合你时，就改写规则。',
+    portrait: '你与武则天相似的，是面对束缚时的那股劲。你不轻易把「从来如此」当作理由，善于在既有秩序里看见缝隙，再把缝隙撑成通道。你的决断往往带着清晰的目标感。',
+    base: { 决断:95, 共情:42, 开创:92, 洞察:78, 表达:72, 经营:85, 独立:96, 担当:80 },
+    common: [
+      { title: '第一底色 · 决断', desc: '关键节点上，你敢于承担选择的后果，而不是把球踢给环境。' },
+      { title: '隐藏天赋 · 独立', desc: '你习惯自己想清楚，再决定跟谁同行。这让你很少被潮流裹挟。' },
+      { title: '长期优势 · 开创', desc: '你愿意试别人没走过的路，并把新路变成可复制的方法。' }
+    ],
+    realLife: '现实中你常是破局的那个人：别人还在适应规则，你已经在想规则能不能改。',
+    blindSpot: '推进太猛时，可能低估旁人需要的缓冲与安全感。',
+    risk: '当「决断」变成惯性，你可能忽略协作中的情绪成本。记得给团队留出对齐的时间。',
+    advice: '强势可以是工具，但不必是唯一姿态；留一点柔软，反而更稳。',
+    lines: [
+      '规则不适合你时，就改写规则。',
+      '位置不是等人给的，是自己站出来的。',
+      '真正的权力，是让秩序为愿景服务。'
+    ],
+    closing: '你是天生的慢决策者中的「破局型」。别人急着表态时，你先把利害算清；别人依赖关系网，你更信自己的判断；你也很难对不公视而不见。'
+  },
+  {
+    id: 'wangyangming',
+    name: '王阳明',
+    subtitle: '明 · 知行合一 · 心学家',
+    tags: ['洞察','担当','独立'],
+    dominant: '洞察',
+    quote: '知是行之始，行是知之成。',
+    portrait: '你与王阳明相似的，是对「内心秩序」的重视。你不满足于表面正确，总想把道理落到行动里。面对混乱时，你倾向先澄清自己的立场，再向外发力。',
+    base: { 决断:72, 共情:70, 开创:55, 洞察:96, 表达:75, 经营:48, 独立:92, 担当:94 },
+    common: [
+      { title: '第一底色 · 洞察', desc: '你善于看见问题背后的心念与动机，而不只盯着表象冲突。' },
+      { title: '隐藏天赋 · 担当', desc: '想清楚之后，你愿意把责任扛在自己肩上，而不是甩给命运。' },
+      { title: '长期优势 · 独立', desc: '你相信答案最终要靠自己体认，外在评价只是参考。' }
+    ],
+    realLife: '现实中你常是「想透了再做」的人：行动前会先对齐原则，做完后还会复盘是否言行一致。',
+    blindSpot: '过度内省时，可能把简单问题复杂化，耽误出手时机。',
+    risk: '当「洞察」转向自我苛责，你可能对自己太严。记得洞察也要留给自己一点慈悲。',
+    advice: '知行合一不是完美主义；小步验证，比一次想透更接近真理。',
+    lines: [
+      '知是行之始，行是知之成。',
+      '心即理，理在事上磨。',
+      '此心光明，亦复何言。'
+    ],
+    closing: '你是天生的慢决策者中的「内省型」。别人凭经验冲，你先问自己是否真懂；别人很快表态，你要确认立场是否站得住；你也很难假装认同内心反对的事。'
+  },
+  {
+    id: 'sushi',
+    name: '苏轼',
+    subtitle: '北宋 · 通达文人 · 生活哲学家',
+    tags: ['表达','共情','开创'],
+    dominant: '表达',
+    quote: '一蓑烟雨任平生。',
+    portrait: '你与苏轼相似的，是把处境转化成意义的能力。你不否认波折，却总能找到一种更宽的视角。你善于用语言与幽默化解张力，也愿意在变化里保持对人与世界的好奇。',
+    base: { 决断:55, 共情:90, 开创:82, 洞察:75, 表达:96, 经营:50, 独立:78, 担当:65 },
+    common: [
+      { title: '第一底色 · 表达', desc: '你能把复杂感受说清楚，也能让别人在你的叙述里感到被理解。' },
+      { title: '隐藏天赋 · 共情', desc: '你很容易看见他人处境里的难处，并愿意用温度回应。' },
+      { title: '长期优势 · 开创', desc: '你不执着于一条路，善于在限制中发明新的活法。' }
+    ],
+    realLife: '现实中你常是气氛的调节者与意义的翻译者：同样的事，你能讲出另一种滋味。',
+    blindSpot: '过于通达时，可能回避必须较真的冲突与边界。',
+    risk: '当「表达」取代行动，你可能把想清楚误当成做完了。记得把话说成事。',
+    advice: '豁达很好，但别用豁达掩盖该守的底线；该硬的时候，硬一点也无妨。',
+    lines: [
+      '一蓑烟雨任平生。',
+      '此事古难全，但愿人长久。',
+      '竹杖芒鞋轻胜马，谁怕。'
+    ],
+    closing: '你是天生的慢决策者中的「通达型」。别人急着定输赢，你先问这件事有没有别的打开方式；别人靠立场站队，你更在意人心是否安顿；你也很难对美与趣味无动于衷。'
+  },
+  {
+    id: 'caocao',
+    name: '曹操',
+    subtitle: '三国 · 务实枭雄 · 资源整合者',
+    tags: ['经营','决断','担当'],
+    dominant: '经营',
+    quote: '宁教我负天下人，休教天下人负我——那是误解；真正的我，是能把乱局变成棋盘的人。',
+    portrait: '你与曹操相似的，是把混乱变成可用结构的本能。你不迷恋空谈，更在意谁能用、怎么用、用到何时。你敢于在不确定中下注，也习惯用结果校准判断。',
+    base: { 决断:90, 共情:35, 开创:70, 洞察:85, 表达:60, 经营:96, 独立:80, 担当:88 },
+    common: [
+      { title: '第一底色 · 经营', desc: '你天然关注资源、节奏与回报，擅长把散落的棋子收成一盘局。' },
+      { title: '隐藏天赋 · 决断', desc: '信息不全时，你仍能做出可执行的选择，而不是无限等待。' },
+      { title: '长期优势 · 担当', desc: '你愿意为结果负责，也因此更敢推动真正难的事。' }
+    ],
+    realLife: '现实中你常是「把事做成」的核心：别人在讨论意义，你已经在排优先级与人手。',
+    blindSpot: '效率导向过强时，可能低估情感与信任的长期价值。',
+    risk: '当「经营」压过一切，人际关系会变成工具列表。记得偶尔问：对方需要什么？',
+    advice: '务实是优势；在关键关系上多留一点人情，盘面会更稳。',
+    lines: [
+      '把乱局变成棋盘，才是真本事。',
+      '能用之人，不必求全；能成之事，不必求名。',
+      '时机一到，便要出手。'
+    ],
+    closing: '你是天生的慢决策者中的「务实型」。别人凭感觉冲，你先算投入产出；别人靠情绪结盟，你要用价值确认是否同行；你也很难对低效与空转视而不见。'
+  },
+  {
+    id: 'zhangsun',
+    name: '长孙皇后',
+    subtitle: '唐 · 贤后典范 · 平衡型智者',
+    tags: ['共情','克制','担当'],
+    dominant: '共情',
+    quote: '真正的力量，有时是成全，而不是抢先。',
+    portrait: '你与长孙皇后相似的，是在复杂关系里保持清醒与分寸。你不靠声量取胜，而靠判断与节制影响局面。你善于看见各方所需，并把冲突导向可共存的方案。',
+    base: { 决断:68, 共情:96, 开创:40, 洞察:88, 表达:70, 经营:75, 独立:62, 担当:90 },
+    common: [
+      { title: '第一底色 · 共情', desc: '你能快速感知他人情绪与立场，并据此调整沟通方式。' },
+      { title: '隐藏天赋 · 洞察', desc: '你善于在礼节与场面之下，读出真正的利害与人心。' },
+      { title: '长期优势 · 担当', desc: '你愿意在幕后承担稳定局面的责任，不急于居功。' }
+    ],
+    realLife: '现实中你常是团队与家庭的「稳定器」：冲突来时，你先降温，再找都能接受的出口。',
+    blindSpot: '过于顾全时，可能压抑自己的真实需求，积压成疲惫。',
+    risk: '当「共情」变成自我牺牲，你可能失去边界。记得你的需求同样重要。',
+    advice: '成全别人很好；也请定期为自己留一块不被征用的空间。',
+    lines: [
+      '真正的力量，有时是成全，而不是抢先。',
+      '能劝的时候劝，能退的时候退，都是智慧。',
+      '把锋芒收好，不代表没有锋芒。'
+    ],
+    closing: '你是天生的慢决策者中的「平衡型」。别人急着站队，你先看见各方难处；别人用强势换服从，你更信信任与分寸；你也很难对身边人的不安无动于衷。'
+  }
+];
+
+/* ========== QUESTIONS (10) ========== */
+/* each option: { text, scores: { dim: weight } } */
+const QUESTIONS = [
+  {
+    text: '面对一个重要但信息不全的决定，你通常会？',
+    options: [
+      { text: '先把关键变量列清楚，推演几种路径再选', scores: { 洞察:3, 决断:2, 经营:1 } },
+      { text: '先问信任的人怎么看，再综合自己的感觉', scores: { 共情:3, 表达:1, 洞察:1 } },
+      { text: '设一个截止时间，到点就拍板并承担后果', scores: { 决断:3, 担当:2, 独立:1 } },
+      { text: '先试一个小成本方案，用结果校正方向', scores: { 开创:3, 经营:2, 决断:1 } }
+    ]
+  },
+  {
+    text: '团队陷入争论、迟迟推不动时，你更可能？',
+    options: [
+      { text: '梳理各方诉求，找一个都能接受的折中点', scores: { 共情:3, 经营:2, 表达:1 } },
+      { text: '指出问题本质，提出一条清晰的主线方案', scores: { 洞察:3, 决断:2, 表达:1 } },
+      { text: '直接分配任务与节点，用执行打破僵局', scores: { 决断:3, 担当:2, 经营:1 } },
+      { text: '换个角度讲故事，让大家重新看见意义', scores: { 表达:3, 开创:2, 共情:1 } }
+    ]
+  },
+  {
+    text: '你更欣赏哪种成功？',
+    options: [
+      { text: '十年布局终于兑现的长期胜利', scores: { 经营:3, 洞察:2, 担当:1 } },
+      { text: '在旧秩序里走出一条无人走过的路', scores: { 开创:3, 独立:2, 决断:1 } },
+      { text: '把复杂道理讲到人心里去，影响许多人', scores: { 表达:3, 共情:2, 洞察:1 } },
+      { text: '在关键时刻一人扛住，扭转局面', scores: { 担当:3, 决断:2, 独立:1 } }
+    ]
+  },
+  {
+    text: '学习新领域时，你的习惯是？',
+    options: [
+      { text: '先找底层规律与框架，再补细节', scores: { 洞察:3, 独立:2, 经营:1 } },
+      { text: '边做边学，用实践倒逼理解', scores: { 开创:2, 担当:2, 决断:2 } },
+      { text: '找高手交流，在对话里快速建立地图', scores: { 表达:2, 共情:2, 洞察:1 } },
+      { text: '系统收集资料，做成自己的知识库', scores: { 经营:3, 独立:2, 洞察:1 } }
+    ]
+  },
+  {
+    text: '朋友做错事请你帮忙圆场，你会？',
+    options: [
+      { text: '先理解双方情绪，再帮找台阶下', scores: { 共情:3, 表达:2, 洞察:1 } },
+      { text: '私下如实提醒朋友问题在哪，公开场合给面子', scores: { 洞察:2, 担当:2, 共情:2 } },
+      { text: '明确边界：能帮的帮，原则问题不包庇', scores: { 独立:3, 决断:2, 担当:1 } },
+      { text: '用幽默化解尴尬，把话题引开', scores: { 表达:3, 开创:1, 共情:1 } }
+    ]
+  },
+  {
+    text: '资源有限、目标却很多时，你首先做？',
+    options: [
+      { text: '排出优先级，砍掉不产生杠杆的事项', scores: { 经营:3, 决断:2, 洞察:1 } },
+      { text: '重新定义目标，看有没有更聪明的打法', scores: { 开创:3, 洞察:2, 独立:1 } },
+      { text: '找能共事的人，把能力拼成完整拼图', scores: { 共情:2, 经营:2, 表达:2 } },
+      { text: '选定一件最重要的事，亲自盯到落地', scores: { 担当:3, 决断:2, 独立:1 } }
+    ]
+  },
+  {
+    text: '别人误解你的意图时，你通常？',
+    options: [
+      { text: '把逻辑再讲一遍，必要时写清楚', scores: { 表达:3, 洞察:1, 独立:1 } },
+      { text: '先想对方为什么会那么解读', scores: { 共情:3, 洞察:2, 表达:1 } },
+      { text: '用结果说话，少解释多交付', scores: { 决断:2, 担当:2, 经营:2 } },
+      { text: '不急着辩，保持节奏，时间会证明', scores: { 独立:3, 洞察:1, 担当:1 } }
+    ]
+  },
+  {
+    text: '若给你一次「改变历史」的机会，你更想？',
+    options: [
+      { text: '设计一套能长期运转的制度或战略', scores: { 经营:3, 洞察:2, 决断:1 } },
+      { text: '打破一门禁锢人心的旧观念', scores: { 开创:3, 独立:2, 表达:1 } },
+      { text: '在乱世中保全苍生、稳住人心', scores: { 共情:3, 担当:2, 洞察:1 } },
+      { text: '以一己之力推动关键战役或改革落地', scores: { 担当:3, 决断:2, 独立:1 } }
+    ]
+  },
+  {
+    text: '你在压力最大时，最容易出现的状态是？',
+    options: [
+      { text: '想得更多、更深，迟迟不肯动', scores: { 洞察:3, 经营:1 } },
+      { text: '变得更果断，甚至略显强势', scores: { 决断:3, 独立:2 } },
+      { text: '更在意身边人的感受，怕拖累别人', scores: { 共情:3, 担当:1 } },
+      { text: '寻找非常规出口，换一条路走', scores: { 开创:3, 表达:1 } }
+    ]
+  },
+  {
+    text: '一句话最能代表你的处世态度？',
+    options: [
+      { text: '谋定而后动，动则不负所托', scores: { 洞察:2, 经营:2, 担当:2, 决断:1 } },
+      { text: '规则不适，便改写规则', scores: { 开创:2, 独立:2, 决断:2 } },
+      { text: '知行合一，事上磨心', scores: { 洞察:2, 担当:2, 独立:2 } },
+      { text: '一蓑烟雨，把日子过成诗', scores: { 表达:2, 共情:2, 开创:2 } }
+    ]
+  }
+];
+
+/* ========== STATE ========== */
+let answers = []; // index of selected option per question
+let qIndex = 0;
+let resultFigure = null;
+let matchPct = 0;
+let userScores = {};
+let slideIndex = 0;
+let touchStartX = 0;
+let touchStartY = 0;
+let touchDeltaX = 0;
+
+/* ========== SCREENS ========== */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+/* ========== QUIZ ========== */
+function startQuiz() {
+  answers = [];
+  qIndex = 0;
+  showScreen('quiz');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = QUESTIONS[qIndex];
+  const total = QUESTIONS.length;
+  document.getElementById('quizProgress').textContent = `${qIndex + 1} / ${total}`;
+  document.getElementById('progressFill').style.width = `${((qIndex + 1) / total) * 100}%`;
+  document.getElementById('qNumber').textContent = `QUESTION ${String(qIndex + 1).padStart(2, '0')}`;
+  document.getElementById('qText').textContent = q.text;
+  document.getElementById('btnQuizBack').style.visibility = qIndex === 0 ? 'hidden' : 'visible';
+
+  const box = document.getElementById('options');
+  box.innerHTML = '';
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option';
+    btn.textContent = opt.text;
+    if (answers[qIndex] === i) btn.classList.add('selected');
+    btn.addEventListener('click', () => selectOption(i));
+    box.appendChild(btn);
+  });
+}
+
+function selectOption(i) {
+  answers[qIndex] = i;
+  document.querySelectorAll('.option').forEach((el, idx) => {
+    el.classList.toggle('selected', idx === i);
+  });
+  setTimeout(() => {
+    if (qIndex < QUESTIONS.length - 1) {
+      qIndex++;
+      renderQuestion();
+    } else {
+      finishQuiz();
+    }
+  }, 220);
+}
+
+function quizBack() {
+  if (qIndex > 0) {
+    qIndex--;
+    renderQuestion();
+  }
+}
+
+/* ========== SCORING ========== */
+function finishQuiz() {
+  showScreen('loading');
+  setTimeout(() => {
+    computeResult();
+    renderResult();
+    showScreen('result');
+  }, 1400);
+}
+
+function computeResult() {
+  userScores = {};
+  DIMS.forEach(d => userScores[d] = 0);
+
+  QUESTIONS.forEach((q, qi) => {
+    const opt = q.options[answers[qi]];
+    if (!opt) return;
+    Object.entries(opt.scores).forEach(([dim, w]) => {
+      userScores[dim] = (userScores[dim] || 0) + w;
+    });
+  });
+
+  // Normalize user scores to 0-100-ish for comparison
+  const maxU = Math.max(...DIMS.map(d => userScores[d]), 1);
+  const normUser = {};
+  DIMS.forEach(d => {
+    normUser[d] = (userScores[d] / maxU) * 100;
+  });
+
+  // Score each figure by similarity (weighted cosine-ish / distance)
+  let best = null;
+  let bestSim = -1;
+  FIGURES.forEach(fig => {
+    let dot = 0, n1 = 0, n2 = 0;
+    DIMS.forEach(d => {
+      const a = normUser[d];
+      const b = fig.base[d];
+      // Extra weight on top user dims
+      const w = a > 60 ? 1.4 : 1;
+      dot += w * a * b;
+      n1 += w * a * a;
+      n2 += w * b * b;
+    });
+    const sim = dot / (Math.sqrt(n1) * Math.sqrt(n2) + 1e-6);
+    if (sim > bestSim) {
+      bestSim = sim;
+      best = fig;
+    }
+  });
+
+  resultFigure = best;
+  // Map similarity to 75-98
+  matchPct = Math.round(75 + (bestSim - 0.7) * (23 / 0.3));
+  matchPct = Math.max(75, Math.min(98, matchPct));
+
+  // Derive display bars: blend figure base with user emphasis
+  resultFigure.displayBars = {};
+  DIMS.forEach(d => {
+    const blend = resultFigure.base[d] * 0.72 + normUser[d] * 0.28;
+    // slight jitter for authenticity, deterministic from scores
+    const j = ((userScores[d] * 7 + d.length * 3) % 5) - 2;
+    resultFigure.displayBars[d] = Math.max(30, Math.min(99, Math.round(blend + j)));
+  });
+}
+
+/* ========== RESULT RENDER ========== */
+function renderResult() {
+  const f = resultFigure;
+  slideIndex = 0;
+  const slides = document.getElementById('slides');
+
+  const barsHtml = DIMS.map(d => `
+    <div class="bar-row">
+      <span class="bar-label">${d}</span>
+      <div class="bar-track"><div class="bar-fill" data-score="${f.displayBars[d]}"></div></div>
+      <span class="bar-score">${f.displayBars[d]}</span>
+    </div>
+  `).join('');
+
+  const traitsHtml = f.common.map(t => `
+    <div class="trait-card">
+      <div class="trait-title">${t.title}</div>
+      <div class="trait-desc">${t.desc}</div>
+    </div>
+  `).join('');
+
+  const linesHtml = f.lines.map(l => `<div class="speech">${l}</div>`).join('');
+
+  const histBlock = (extra = '') => `
+    <div class="hist-footer">
+      <h3>历史中曾有人，按你的性格走完一生</h3>
+      <p>${f.closing}${extra ? ' ' + extra : ''}</p>
+    </div>
+  `;
+
+  slides.innerHTML = `
+    <!-- 1 Match -->
+    <div class="slide">
+      <div class="card">
+        <div class="match-label">你的历史人物匹配结果</div>
+        <div class="match-icon">🏛️</div>
+        <div class="match-pct">${matchPct}%</div>
+        <div class="match-name">${f.name}</div>
+        <div class="match-sub">${f.subtitle}</div>
+        <div class="tag-row">${f.tags.map(t => `<span class="tag">${t}</span>`).join('')}</div>
+        <span class="dom-dim">主导维度：${f.dominant}</span>
+        <div class="quote-box">
+          <div class="quote-label">人物心声</div>
+          <div class="quote-text">“${f.quote}”</div>
+        </div>
+      </div>
+      ${histBlock()}
+    </div>
+
+    <!-- 2 Portrait -->
+    <div class="slide">
+      <div class="card">
+        <div class="card-section-title"><span class="num">01</span> · 人物自画像</div>
+        <p style="font-size:14px;color:var(--text-muted);line-height:1.75">${f.portrait}</p>
+      </div>
+      ${histBlock()}
+    </div>
+
+    <!-- 3 Bars -->
+    <div class="slide">
+      <div class="card">
+        <div class="card-section-title"><span class="num">02</span> · 八维能力结构</div>
+        ${barsHtml}
+      </div>
+      ${histBlock()}
+    </div>
+
+    <!-- 4 Common -->
+    <div class="slide">
+      <div class="card">
+        <div class="card-section-title"><span class="num">03</span> · 你与 TA 的共同底色</div>
+        ${traitsHtml}
+      </div>
+      ${histBlock()}
+    </div>
+
+    <!-- 5 Real + blind -->
+    <div class="slide">
+      <div class="card">
+        <div class="card-section-title"><span class="num">04</span> · 现实中的你</div>
+        <p style="font-size:14px;color:var(--text-muted);line-height:1.7;margin-bottom:16px">${f.realLife}</p>
+        <div class="card-section-title"><span class="num">05</span> · 性格盲点与风险提醒</div>
+        <div class="warn-card">
+          <div class="warn-title">可能的盲点</div>
+          <div class="warn-body">${f.blindSpot}</div>
+        </div>
+        <div class="warn-card">
+          <div class="warn-title">风险提醒</div>
+          <div class="warn-body">${f.risk}</div>
+        </div>
+        <div class="advice-card">
+          <div class="advice-title">给你的建议</div>
+          <div class="advice-body">${f.advice}</div>
+        </div>
+      </div>
+      ${histBlock()}
+    </div>
+
+    <!-- 6 Lines -->
+    <div class="slide">
+      <div class="card">
+        <div class="card-section-title"><span class="num">06</span> · 你的三句人物台词</div>
+        ${linesHtml}
+      </div>
+      ${histBlock('愿你把自己的底色，活成属于这个时代的答案。')}
+    </div>
+  `;
+
+  // Dots
+  const dots = document.getElementById('dots');
+  dots.innerHTML = '';
+  for (let i = 0; i < 6; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' active' : '');
+    d.addEventListener('click', () => goSlide(i));
+    dots.appendChild(d);
+  }
+
+  goSlide(0);
+  // Animate bars after paint
+  setTimeout(animateBars, 100);
+}
+
+function animateBars() {
+  document.querySelectorAll('.bar-fill').forEach(el => {
+    el.style.width = el.dataset.score + '%';
+  });
+}
+
+function goSlide(i) {
+  slideIndex = Math.max(0, Math.min(5, i));
+  document.getElementById('slides').style.transform = `translateX(-${slideIndex * 100}%)`;
+  document.getElementById('slideInd').textContent = `${slideIndex + 1} / 6`;
+  document.querySelectorAll('.dot').forEach((d, idx) => {
+    d.classList.toggle('active', idx === slideIndex);
+  });
+  if (slideIndex === 2) setTimeout(animateBars, 50);
+}
+
+/* Swipe */
+function setupSwipe() {
+  const wrap = document.getElementById('slidesWrap');
+  wrap.addEventListener('touchstart', e => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    touchDeltaX = 0;
+  }, { passive: true });
+  wrap.addEventListener('touchmove', e => {
+    touchDeltaX = e.touches[0].clientX - touchStartX;
+    const dy = e.touches[0].clientY - touchStartY;
+    if (Math.abs(touchDeltaX) > Math.abs(dy) && Math.abs(touchDeltaX) > 8) {
+      // horizontal intent — optional visual drag could be added
+    }
+  }, { passive: true });
+  wrap.addEventListener('touchend', () => {
+    if (touchDeltaX < -50) goSlide(slideIndex + 1);
+    else if (touchDeltaX > 50) goSlide(slideIndex - 1);
+    touchDeltaX = 0;
+  });
+  // Mouse drag for desktop
+  let mouseDown = false, mx0 = 0;
+  wrap.addEventListener('mousedown', e => { mouseDown = true; mx0 = e.clientX; });
+  window.addEventListener('mouseup', e => {
+    if (!mouseDown) return;
+    mouseDown = false;
+    const dx = e.clientX - mx0;
+    if (dx < -50) goSlide(slideIndex + 1);
+    else if (dx > 50) goSlide(slideIndex - 1);
+  });
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+function shareResult() {
+  const f = resultFigure;
+  const text = `我在「历史人物匹配」中测到：${f.name}（匹配度 ${matchPct}%）\n${f.subtitle}\n标签：${f.tags.join(' · ')}\n主导维度：${f.dominant}\n人物心声：「${f.quote}」\n——你也来测测自己像谁？`;
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => toast('结果文案已复制')).catch(() => fallbackCopy(text));
+  } else {
+    fallbackCopy(text);
+  }
+}
+
+function fallbackCopy(text) {
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); toast('结果文案已复制'); }
+  catch(e) { toast('复制失败，请手动截图分享'); }
+  document.body.removeChild(ta);
+}
+
+/* ========== INIT ========== */
+document.getElementById('btnStart').addEventListener('click', startQuiz);
+document.getElementById('btnQuizBack').addEventListener('click', quizBack);
+document.getElementById('btnRetry').addEventListener('click', () => {
+  showScreen('start');
+});
+document.getElementById('btnShare').addEventListener('click', shareResult);
+setupSwipe();
+</script>
+</body>
+</html>
