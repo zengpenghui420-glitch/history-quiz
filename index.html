@@ -412,6 +412,13 @@ body { max-width: 430px; margin: 0 auto; position: relative; min-height: 100dvh;
   transition: opacity 0.3s; pointer-events: none; white-space: nowrap;
 }
 .toast.show { opacity: 1; }
+.share-ov{position:fixed;inset:0;background:rgba(30,28,60,.88);z-index:200;display:none;flex-direction:column;align-items:center;padding:16px 16px calc(16px + var(--safe-bottom));overflow-y:auto}
+.share-ov.show{display:flex}
+.share-ov img{width:100%;max-width:400px;border-radius:12px;box-shadow:0 8px 30px rgba(0,0,0,.4)}
+.share-hint{color:#fff;font-size:14px;margin:12px 0 10px}
+.share-btns{display:flex;gap:10px;width:100%;max-width:400px;margin-bottom:8px}
+.share-btns button{flex:1;padding:12px;border-radius:22px;border:none;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer}
+.sb-dl{background:#fff;color:#5A5490}.sb-close{background:rgba(255,255,255,.18);color:#fff}
 </style>
 </head>
 <body>
@@ -472,10 +479,16 @@ body { max-width: 430px; margin: 0 auto; position: relative; min-height: 100dvh;
   <div class="dots" id="dots"></div>
   <div class="result-actions">
     <button class="btn-outline" id="btnRetry">再测一次</button>
-    <button class="btn-share" id="btnShare">复制结果文案</button>
+    <button class="btn-share" id="btnShare">复制文案</button>
+    <button class="btn-share" id="btnImg">生成分享图</button>
   </div>
 </section>
 
+<div class="share-ov" id="shareOv">
+  <div class="share-hint">长按图片保存，或点击下载</div>
+  <img id="shareImg" alt="分享图">
+  <div class="share-btns" style="margin-top:12px"><button class="sb-dl" id="btnDl">下载</button><button class="sb-close" id="btnClose">关闭</button></div>
+</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -1071,6 +1084,66 @@ document.getElementById('btnRetry').addEventListener('click', () => {
 });
 document.getElementById('btnShare').addEventListener('click', shareResult);
 setupSwipe();
+
+/* ========== SHARE IMAGE ========== */
+const SHARE_URL='https://zengpenghui420-glitch.github.io/history-quiz/';
+const FONT='"PingFang SC","Hiragino Sans GB","Noto Sans CJK SC","Noto Sans SC","Microsoft YaHei",sans-serif';
+function rr(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath();}
+function wrap(c,text,maxW){const out=[];let line='';for(const ch of text){if(c.measureText(line+ch).width>maxW&&line){out.push(line);line=ch;}else line+=ch;}if(line)out.push(line);return out;}
+function buildShareCanvas(){
+  const f=resultFigure,W=1080,P=72,CW=W-P*2;
+  const cv=document.createElement('canvas');const c=cv.getContext('2d');
+  // measure height: compute layout with a draw function run twice
+  function draw(doDraw){
+    let y=0;const T=(t,x,yy,size,color,weight,align)=>{c.font=`${weight||400} ${size}px ${FONT}`;c.fillStyle=color;c.textAlign=align||'left';c.textBaseline='top';if(doDraw)c.fillText(t,x,yy);};
+    if(doDraw){const g=c.createLinearGradient(0,0,0,cv.height);g.addColorStop(0,'#F3EFFA');g.addColorStop(1,'#E9E3F5');c.fillStyle=g;c.fillRect(0,0,W,cv.height);}
+    y=80;T('你的历史人物匹配结果',W/2,y,38,'#7B74B4',500,'center');y+=80;
+    // card 1
+    const c1=y;let cy=y+60;
+    const H1=760;if(doDraw){c.fillStyle='#fff';rr(c,P,c1,CW,H1,40);c.fill();c.strokeStyle='#D4CFE8';c.lineWidth=3;c.stroke();}
+    T(matchPct+'%',W/2,cy,190,'#7B74B4',700,'center');cy+=220;
+    T(f.name,W/2,cy,96,'#2D2D5A',700,'center');cy+=125;
+    T(f.subtitle,W/2,cy,38,'#6B6B7B',400,'center');cy+=80;
+    c.font=`500 38px ${FONT}`;const tw=f.tags.map(t=>c.measureText(t).width+64);const tot=tw.reduce((a,b)=>a+b,0)+24*(tw.length-1);let tx=(W-tot)/2;
+    f.tags.forEach((t,i)=>{if(doDraw){c.fillStyle='#F0EDF5';rr(c,tx,cy,tw[i],72,36);c.fill();}T(t,tx+tw[i]/2,cy+16,38,'#5A5490',500,'center');tx+=tw[i]+24;});cy+=104;
+    c.font=`600 38px ${FONT}`;const dt='主导维度：'+f.dominant,dw=c.measureText(dt).width+80;
+    if(doDraw){c.fillStyle='#E8E4F0';rr(c,(W-dw)/2,cy,dw,76,38);c.fill();}T(dt,W/2,cy+18,38,'#5A5490',600,'center');
+    y=c1+H1+40;
+    // quote
+    c.font=`500 44px ${FONT}`;const ql=wrap(c,'“'+f.quote+'”',CW-96);const qh=110+ql.length*66+30;
+    if(doDraw){c.fillStyle='#fff';rr(c,P,y,CW,qh,40);c.fill();c.strokeStyle='#D4CFE8';c.stroke();}
+    T('人物心声',P+48,y+44,34,'#7B74B4',600);ql.forEach((l,i)=>T(l,P+48,y+104+i*66,44,'#2D2D5A',500));y+=qh+40;
+    // bars
+    const bh=140+DIMS.length*82;
+    if(doDraw){c.fillStyle='#fff';rr(c,P,y,CW,bh,40);c.fill();c.strokeStyle='#D4CFE8';c.stroke();}
+    T('八维能力结构',P+48,y+48,44,'#2D2D5A',700);
+    DIMS.forEach((d,i)=>{const by=y+130+i*82,v=f.displayBars[d],bx=P+170,bw=CW-170-150;
+      T(d,P+48,by,38,'#333340',500);
+      if(doDraw){c.fillStyle='#E8E4F0';rr(c,bx,by+8,bw,28,14);c.fill();c.fillStyle='#8B84C0';rr(c,bx,by+8,bw*v/100,28,14);c.fill();}
+      T(String(v),P+CW-48,by,38,'#7B74B4',600,'right');});
+    y+=bh+40;
+    // lines
+    c.font=`500 40px ${FONT}`;const L=f.lines.map(l=>wrap(c,'“'+l+'”',CW-150));
+    const lh=130+L.reduce((a,l)=>a+l.length*60+56,0);
+    if(doDraw){c.fillStyle='#fff';rr(c,P,y,CW,lh,40);c.fill();c.strokeStyle='#D4CFE8';c.stroke();}
+    T('你的三句人物台词',P+48,y+48,44,'#2D2D5A',700);let ly=y+130;
+    L.forEach(ls=>{const h=ls.length*60+28;if(doDraw){c.fillStyle='#F0EDF5';rr(c,P+48,ly,CW-96,h,24);c.fill();}ls.forEach((t,i)=>T(t,P+78,ly+16+i*60,40,'#2D2D5A',500));ly+=h+28;});
+    y+=lh+60;
+    T('你像哪个历史人物？',W/2,y,46,'#2D2D5A',700,'center');y+=72;
+    T('打开链接，测测你像谁',W/2,y,32,'#6B6B7B',400,'center');y+=56;
+    T(SHARE_URL,W/2,y,30,'#7B74B4',500,'center');y+=100;
+    return y;
+  }
+  cv.width=W;cv.height=4000;const H=draw(false);cv.height=H;draw(true);return cv;
+}
+function showShareImage(){
+  try{const cv=buildShareCanvas();const url=cv.toDataURL('image/png');
+    document.getElementById('shareImg').src=url;document.getElementById('shareOv').classList.add('show');window.__shareURL=url;}
+  catch(e){console.error(e);toast('生成失败，请截图分享');}
+}
+document.getElementById('btnImg').addEventListener('click',showShareImage);
+document.getElementById('btnClose').addEventListener('click',()=>document.getElementById('shareOv').classList.remove('show'));
+document.getElementById('btnDl').addEventListener('click',()=>{const a=document.createElement('a');a.href=window.__shareURL;a.download='历史人物-'+resultFigure.name+'.png';document.body.appendChild(a);a.click();a.remove();});
 </script>
 </body>
 </html>
