@@ -419,6 +419,18 @@ body { max-width: 430px; margin: 0 auto; position: relative; min-height: 100dvh;
 .share-btns{display:flex;gap:10px;width:100%;max-width:400px;margin-bottom:8px}
 .share-btns button{flex:1;padding:12px;border-radius:22px;border:none;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer}
 .sb-dl{background:#fff;color:#5A5490}.sb-close{background:rgba(255,255,255,.18);color:#fff}
+
+/* access code modal */
+.code-mask{position:fixed;inset:0;background:rgba(40,36,60,.45);z-index:150;display:none;align-items:center;justify-content:center;padding:20px}
+.code-mask.show{display:flex}
+.code-panel-wrap{position:relative;width:100%;max-width:340px}
+.code-panel{width:100%;background:#fff;border-radius:20px;padding:24px 20px 20px;box-shadow:0 12px 40px rgba(60,50,110,.2);text-align:center}
+.code-panel h3{font-size:18px;color:#333340;margin-bottom:16px;font-weight:700}
+.code-panel input{width:100%;box-sizing:border-box;padding:14px 16px;border:1.5px solid #DDD8EC;border-radius:14px;font-size:16px;font-family:inherit;color:#333340;background:#F5F3F7;outline:none;text-align:center;letter-spacing:1px}
+.code-panel input:focus{border-color:#7B74B4;background:#fff}
+.code-panel .btn-primary{margin-top:14px;width:100%;max-width:none}
+.code-hint{margin-top:12px;font-size:12px;color:#8A8798;line-height:1.5}
+.code-close{position:absolute;top:10px;right:14px;background:none;border:none;font-size:22px;color:#8A8798;cursor:pointer;line-height:1;font-family:inherit;padding:4px}
 </style>
 </head>
 <body>
@@ -488,6 +500,17 @@ body { max-width: 430px; margin: 0 auto; position: relative; min-height: 100dvh;
   <div class="share-hint">长按图片保存，或点击下载</div>
   <img id="shareImg" alt="分享图">
   <div class="share-btns" style="margin-top:12px"><button class="sb-dl" id="btnDl">下载</button><button class="sb-close" id="btnClose">关闭</button></div>
+</div>
+<div class="code-mask" id="codeMask" aria-hidden="true">
+  <div class="code-panel-wrap">
+    <div class="code-panel">
+      <button type="button" class="code-close" id="codeClose" aria-label="关闭">×</button>
+      <h3>输入测试验证码</h3>
+      <input type="text" id="codeInput" placeholder="请输入验证码" autocomplete="off" autocapitalize="characters" maxlength="32">
+      <button type="button" class="btn-primary" id="btnCodeOk">开始答题</button>
+      <p class="code-hint">购买后客服会发给你验证码<br>每个码限用 3 次 · 同设备本页刷新内可重测</p>
+    </div>
+  </div>
 </div>
 <div class="toast" id="toast"></div>
 
@@ -652,96 +675,56 @@ const FIGURES = [
 /* ========== QUESTIONS (10) ========== */
 /* each option: { text, scores: { dim: weight } } */
 const QUESTIONS = [
-  {
-    text: '面对一个重要但信息不全的决定，你通常会？',
-    options: [
-      { text: '先把关键变量列清楚，推演几种路径再选', scores: { 洞察:3, 决断:2, 经营:1 } },
-      { text: '先问信任的人怎么看，再综合自己的感觉', scores: { 共情:3, 表达:1, 洞察:1 } },
-      { text: '设一个截止时间，到点就拍板并承担后果', scores: { 决断:3, 担当:2, 独立:1 } },
-      { text: '先试一个小成本方案，用结果校正方向', scores: { 开创:3, 经营:2, 决断:1 } }
-    ]
-  },
-  {
-    text: '团队陷入争论、迟迟推不动时，你更可能？',
-    options: [
-      { text: '梳理各方诉求，找一个都能接受的折中点', scores: { 共情:3, 经营:2, 表达:1 } },
-      { text: '指出问题本质，提出一条清晰的主线方案', scores: { 洞察:3, 决断:2, 表达:1 } },
-      { text: '直接分配任务与节点，用执行打破僵局', scores: { 决断:3, 担当:2, 经营:1 } },
-      { text: '换个角度讲故事，让大家重新看见意义', scores: { 表达:3, 开创:2, 共情:1 } }
-    ]
-  },
-  {
-    text: '你更欣赏哪种成功？',
-    options: [
-      { text: '十年布局终于兑现的长期胜利', scores: { 经营:3, 洞察:2, 担当:1 } },
-      { text: '在旧秩序里走出一条无人走过的路', scores: { 开创:3, 独立:2, 决断:1 } },
-      { text: '把复杂道理讲到人心里去，影响许多人', scores: { 表达:3, 共情:2, 洞察:1 } },
-      { text: '在关键时刻一人扛住，扭转局面', scores: { 担当:3, 决断:2, 独立:1 } }
-    ]
-  },
-  {
-    text: '学习新领域时，你的习惯是？',
-    options: [
-      { text: '先找底层规律与框架，再补细节', scores: { 洞察:3, 独立:2, 经营:1 } },
-      { text: '边做边学，用实践倒逼理解', scores: { 开创:2, 担当:2, 决断:2 } },
-      { text: '找高手交流，在对话里快速建立地图', scores: { 表达:2, 共情:2, 洞察:1 } },
-      { text: '系统收集资料，做成自己的知识库', scores: { 经营:3, 独立:2, 洞察:1 } }
-    ]
-  },
-  {
-    text: '朋友做错事请你帮忙圆场，你会？',
-    options: [
-      { text: '先理解双方情绪，再帮找台阶下', scores: { 共情:3, 表达:2, 洞察:1 } },
-      { text: '私下如实提醒朋友问题在哪，公开场合给面子', scores: { 洞察:2, 担当:2, 共情:2 } },
-      { text: '明确边界：能帮的帮，原则问题不包庇', scores: { 独立:3, 决断:2, 担当:1 } },
-      { text: '用幽默化解尴尬，把话题引开', scores: { 表达:3, 开创:1, 共情:1 } }
-    ]
-  },
-  {
-    text: '资源有限、目标却很多时，你首先做？',
-    options: [
-      { text: '排出优先级，砍掉不产生杠杆的事项', scores: { 经营:3, 决断:2, 洞察:1 } },
-      { text: '重新定义目标，看有没有更聪明的打法', scores: { 开创:3, 洞察:2, 独立:1 } },
-      { text: '找能共事的人，把能力拼成完整拼图', scores: { 共情:2, 经营:2, 表达:2 } },
-      { text: '选定一件最重要的事，亲自盯到落地', scores: { 担当:3, 决断:2, 独立:1 } }
-    ]
-  },
-  {
-    text: '别人误解你的意图时，你通常？',
-    options: [
-      { text: '把逻辑再讲一遍，必要时写清楚', scores: { 表达:3, 洞察:1, 独立:1 } },
-      { text: '先想对方为什么会那么解读', scores: { 共情:3, 洞察:2, 表达:1 } },
-      { text: '用结果说话，少解释多交付', scores: { 决断:2, 担当:2, 经营:2 } },
-      { text: '不急着辩，保持节奏，时间会证明', scores: { 独立:3, 洞察:1, 担当:1 } }
-    ]
-  },
-  {
-    text: '若给你一次「改变历史」的机会，你更想？',
-    options: [
-      { text: '设计一套能长期运转的制度或战略', scores: { 经营:3, 洞察:2, 决断:1 } },
-      { text: '打破一门禁锢人心的旧观念', scores: { 开创:3, 独立:2, 表达:1 } },
-      { text: '在乱世中保全苍生、稳住人心', scores: { 共情:3, 担当:2, 洞察:1 } },
-      { text: '以一己之力推动关键战役或改革落地', scores: { 担当:3, 决断:2, 独立:1 } }
-    ]
-  },
-  {
-    text: '你在压力最大时，最容易出现的状态是？',
-    options: [
-      { text: '想得更多、更深，迟迟不肯动', scores: { 洞察:3, 经营:1 } },
-      { text: '变得更果断，甚至略显强势', scores: { 决断:3, 独立:2 } },
-      { text: '更在意身边人的感受，怕拖累别人', scores: { 共情:3, 担当:1 } },
-      { text: '寻找非常规出口，换一条路走', scores: { 开创:3, 表达:1 } }
-    ]
-  },
-  {
-    text: '一句话最能代表你的处世态度？',
-    options: [
-      { text: '谋定而后动，动则不负所托', scores: { 洞察:2, 经营:2, 担当:2, 决断:1 } },
-      { text: '规则不适，便改写规则', scores: { 开创:2, 独立:2, 决断:2 } },
-      { text: '知行合一，事上磨心', scores: { 洞察:2, 担当:2, 独立:2 } },
-      { text: '一蓑烟雨，把日子过成诗', scores: { 表达:2, 共情:2, 开创:2 } }
-    ]
-  }
+  { text: '周末突然空出一整天，你会？', options: [
+    { text: '列个计划，把攒着的事一件件做完', scores: { 经营:3, 决断:2, 洞察:1 } },
+    { text: '约朋友吃饭聊天', scores: { 表达:2, 共情:2 } },
+    { text: '去一个从没去过的地方逛逛', scores: { 开创:3, 独立:2 } },
+    { text: '一个人待着，看书或想想事情', scores: { 洞察:3, 独立:2 } } ] },
+  { text: '工作群里有人甩锅给你，你会？', options: [
+    { text: '马上把记录发出来，说清楚', scores: { 决断:3, 独立:2 } },
+    { text: '先把事情解决，回头再私聊', scores: { 担当:3, 经营:2, 决断:1 } },
+    { text: '开个玩笑带过，不让气氛太僵', scores: { 表达:3, 共情:1 } },
+    { text: '记在心里，以后跟他合作多留个心眼', scores: { 经营:2, 洞察:2, 决断:1 } } ] },
+  { text: '好朋友失恋了，半夜找你哭，你会？', options: [
+    { text: '一直陪着听，让 TA 哭个够', scores: { 共情:3, 担当:2 } },
+    { text: '帮 TA 分析问题到底出在哪', scores: { 洞察:3, 表达:1 } },
+    { text: '第二天拉 TA 出去玩，换个心情', scores: { 开创:2, 表达:2, 共情:1 } },
+    { text: '直接说：别回头，下一个更好', scores: { 决断:3, 独立:1 } } ] },
+  { text: '谈恋爱时，你更像哪种人？', options: [
+    { text: '默默照顾对方的小细节', scores: { 共情:3, 担当:2 } },
+    { text: '会制造惊喜和浪漫', scores: { 表达:2, 开创:3 } },
+    { text: '需要自己的空间，不喜欢黏太紧', scores: { 独立:3, 洞察:1 } },
+    { text: '会认真规划两个人的未来', scores: { 经营:3, 决断:1, 担当:1 } } ] },
+  { text: '团队一起做事，你通常是？', options: [
+    { text: '拿主意、分任务的那个人', scores: { 决断:3, 经营:2, 担当:1 } },
+    { text: '想点子、出创意的那个人', scores: { 开创:3, 表达:1 } },
+    { text: '照顾大家情绪、调和矛盾的那个人', scores: { 共情:3, 经营:1 } },
+    { text: '最后兜底、把活干完的那个人', scores: { 担当:3, 洞察:1 } } ] },
+  { text: '买一件比较贵的东西前，你会？', options: [
+    { text: '对比好几家，算清楚值不值', scores: { 经营:3, 洞察:2 } },
+    { text: '喜欢就买，不想纠结', scores: { 决断:3, 开创:1 } },
+    { text: '问问朋友的意见', scores: { 共情:2, 表达:2 } },
+    { text: '想想自己是不是真的需要', scores: { 洞察:2, 独立:2, 担当:1 } } ] },
+  { text: '有人当众说了句让你不舒服的话，你会？', options: [
+    { text: '当场回怼回去', scores: { 决断:2, 独立:2, 表达:1 } },
+    { text: '笑笑不说话，事后自己消化', scores: { 共情:2, 洞察:2 } },
+    { text: '用一句幽默的话化解', scores: { 表达:2, 开创:2 } },
+    { text: '私下找他认真聊一次', scores: { 担当:2, 共情:1, 洞察:1 } } ] },
+  { text: '你理想中的工作是？', options: [
+    { text: '能带团队、做大事的', scores: { 经营:3, 决断:2, 担当:1 } },
+    { text: '自由、能做自己喜欢的', scores: { 独立:3, 开创:2 } },
+    { text: '能帮助别人、有温度的', scores: { 共情:3, 担当:2 } },
+    { text: '能表达自己、被人看见的', scores: { 表达:3, 开创:1 } } ] },
+  { text: '遇到一件很难的事，你第一反应是？', options: [
+    { text: '先想清楚再动手', scores: { 洞察:3, 经营:1 } },
+    { text: '先干起来，边做边改', scores: { 开创:2, 决断:2, 独立:1 } },
+    { text: '找人一起商量', scores: { 经营:2, 表达:1, 共情:1 } },
+    { text: '咬咬牙，自己扛下来', scores: { 担当:3, 独立:2 } } ] },
+  { text: '朋友们一般怎么形容你？', options: [
+    { text: '靠谱，有主见', scores: { 决断:2, 担当:2, 经营:1 } },
+    { text: '有趣，会聊天', scores: { 表达:3, 开创:1, 共情:1 } },
+    { text: '温柔，会照顾人', scores: { 共情:3, 担当:1 } },
+    { text: '通透，看事情准', scores: { 洞察:3, 独立:1 } } ] }
 ];
 
 /* ========== STATE ========== */
@@ -1077,7 +1060,127 @@ function fallbackCopy(text) {
 }
 
 /* ========== INIT ========== */
-document.getElementById('btnStart').addEventListener('click', startQuiz);
+const $=id=>document.getElementById(id);
+/* ===== ACCESS CODE (limited-use via MantleDB) ===== */
+const MANTLE_NS='catquiz-zph420-codes';
+const MANTLE_KEY='f60c0dae2088e5ccd5061a110aef0c0ff2a5b85f2658e78809c9123c9d82a22c';
+const MANTLE_BASE='https://mantledb.sh/v2/'+MANTLE_NS;
+const ACCESS_KEY='hq_unlocked';
+const ACCESS_CODE_KEY='hq_code';
+function isUnlocked(){try{return sessionStorage.getItem(ACCESS_KEY)==='1'}catch(e){return false}}
+function setUnlocked(code){
+  try{
+    sessionStorage.setItem(ACCESS_KEY,'1');
+    if(code)sessionStorage.setItem(ACCESS_CODE_KEY,code);
+  }catch(e){}
+}
+function normalizeCode(v){return String(v||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'')}
+function openCodeModal(prefill){
+  $('codeMask').classList.add('show');
+  $('codeMask').setAttribute('aria-hidden','false');
+  const inp=$('codeInput');
+  if(prefill!=null)inp.value=prefill;else if(!inp.value)inp.value='';
+  setTimeout(()=>inp.focus(),50);
+}
+function closeCodeModal(){
+  $('codeMask').classList.remove('show');
+  $('codeMask').setAttribute('aria-hidden','true');
+}
+
+function setCodeBusy(busy){
+  const btn=$('btnCodeOk');
+  btn.disabled=!!busy;
+  btn.textContent=busy?'验证中…':'开始答题';
+  btn.style.opacity=busy?'0.7':'1';
+}
+async function mantleGet(code){
+  const r=await fetch(MANTLE_BASE+'/hq/'+encodeURIComponent(code),{
+    headers:{'X-Mantle-Key':MANTLE_KEY}
+  });
+  if(r.status===404)return null;
+  if(!r.ok)throw new Error('net '+r.status);
+  return r.json();
+}
+async function mantleDecr(code){
+  const r=await fetch('https://mantledb.sh/v2/increment/'+MANTLE_NS+'/hq/'+encodeURIComponent(code),{
+    method:'POST',
+    headers:{'Content-Type':'application/json','X-Mantle-Key':MANTLE_KEY},
+    body:JSON.stringify({key:'remaining',by:-1})
+  });
+  if(!r.ok)throw new Error('net '+r.status);
+  return r.json();
+}
+async function mantleIncr(code){
+  try{
+    await fetch('https://mantledb.sh/v2/increment/'+MANTLE_NS+'/hq/'+encodeURIComponent(code),{
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-Mantle-Key':MANTLE_KEY},
+      body:JSON.stringify({key:'remaining',by:1})
+    });
+  }catch(e){}
+}
+async function redeemCode(code){
+  const data=await mantleGet(code);
+  if(!data||typeof data.remaining!=='number'){
+    return {ok:false,reason:'invalid'};
+  }
+  if(data.remaining<=0){
+    return {ok:false,reason:'exhausted'};
+  }
+  const after=await mantleDecr(code);
+  const left=typeof after.remaining==='number'?after.remaining:-1;
+  if(left<0){
+    await mantleIncr(code);
+    return {ok:false,reason:'exhausted'};
+  }
+  return {ok:true,remaining:left,max:data.max||3};
+}
+async function tryUnlock(fromUrl){
+  const code=normalizeCode($('codeInput').value);
+  if(!code){if(!fromUrl)toast('请输入验证码');return false}
+  setCodeBusy(true);
+  try{
+    const res=await redeemCode(code);
+    if(res.ok){
+      setUnlocked(code);
+      const left=res.remaining;
+      toast(left>0?('验证成功，还可以测 '+left+' 次'):'验证成功，这是本码最后一次');
+      closeCodeModal();startQuiz();
+      return true;
+    }
+    if(!fromUrl){
+      if(res.reason==='exhausted')toast('此验证码已用完（每个码限 3 次）');
+      else toast('验证码不正确');
+    }
+    return false;
+  }catch(e){
+    console.error(e);
+    if(!fromUrl)toast('网络异常，请稍后重试');
+    return false;
+  }finally{
+    setCodeBusy(false);
+  }
+}
+
+$('btnStart').onclick=()=>{
+  if(isUnlocked()){startQuiz();return}
+  openCodeModal();
+};
+$('btnCodeOk').onclick=()=>tryUnlock(false);
+$('codeInput').addEventListener('keydown',e=>{if(e.key==='Enter')tryUnlock(false)});
+$('codeClose').onclick=closeCodeModal;
+$('codeMask').addEventListener('click',e=>{if(e.target===$('codeMask'))closeCodeModal()});
+(function(){
+  try{
+    const p=new URLSearchParams(location.search).get('code');
+    if(p==null||p==='')return;
+    if(isUnlocked())return;
+    $('codeInput').value=p;
+    openCodeModal(p);
+    tryUnlock(true);
+  }catch(e){}
+})();
+
 document.getElementById('btnQuizBack').addEventListener('click', quizBack);
 document.getElementById('btnRetry').addEventListener('click', () => {
   showScreen('start');
